@@ -1,0 +1,501 @@
+000<!DOCTYPE html>
+<html>
+  <head>
+    <title>Facial Recognition Door Lock</title>
+    <style>
+      body {
+        background: linear-gradient(to bottom right, black, white);
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+      }
+      #button-remove-face {
+        width: 200px;
+        height: 150px;
+        border: none;
+        border-radius: 10px;
+        background-color: black;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        font-size: 35px;
+        font-weight: bold;
+        color: white;
+      }
+
+      #button-remove-face:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      #button-remove-face:active {
+        transform: scale(0.9);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      #container {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .button {
+        width: 200px;
+        height: 150px;
+        border: none;
+        border-radius: 10px;
+        background-color: black;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        font-size: 35px;
+        font-weight: bold;
+        color: white;
+      }
+      .popup {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          display: none;
+          background-color: white;
+          border: 1px solid #888;
+          border-radius: 5px;
+          padding: 20px;
+          text-align: center;
+    }
+    .popup-text {
+      font-size: 18px;
+    }
+      .button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      }
+      .button:active {
+        transform: scale(0.9);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
+      #button1 {
+        background-color: black;
+      }
+      #button2 {
+        background-color: black;
+      }
+      #button3 {
+        background-color: black;
+      }
+      #button4 {
+        background-color: black;
+      }
+      #button5 {
+        background-color: black;
+      }
+      #button1:hover {
+        background-color: #444;
+      }
+      #button2:hover {
+        background-color: #444;
+      }
+      #button3:hover {
+        background-color: #444;
+      }
+      #button4:hover {
+        background-color: #444;
+      }
+      #button5:hover {
+        background-color: #444;
+      }
+        
+      #button1:active {
+        background-color: #ff6347;
+      }
+      #button2:active {
+        background-color: #4169e1;
+      }
+      #button3:active {
+        background-color: #7fff7f;
+      }
+      #button4:active {
+        background-color: #ff4444;
+      }
+      #button5:active {
+        background-color: #7b68ee;
+       }
+      #button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+      }
+      #title {
+        font-size: 36px;
+        font-weight: bold;
+        color: #fff;
+        text-align: center;
+        margin: 40px 0;
+        text-shadow: 2px 2px #333;
+      }
+      #admin-panel {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="main">
+        <div id="title">Facial Recognition Door Lock</div>
+        <div id="camera"></div>
+        <div id="button-container">
+          <button id="button3" class="button">RFID</button>
+          <button id="button4" class="button">Train Model</button>
+          <br />
+          <button id="button5" onclick="triggerFacialUnlock()" class="button">Scan Face</button>
+        </div>
+      </div>
+      <div id="rfid-popup" class="popup">
+      <span class="popup-text">Scan RFID to access admin panel</span>
+    </div>
+      <div id="admin-panel">
+        <div id="title">Admin Panel</div>
+        <div id="button-container">
+          <button id="button1" class="button">Add Face</button>
+          <div id="popup" style="display: none;">
+          <video id="video" width="640" height="480" autoplay></video>
+          <button id="capture">Capture</button>
+          <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+        </div>
+          <button id="button-remove-face">Remove Face</button>
+          <div id="folder-names-container"></div>
+          <div id="remove-face-popup" class="popup">
+            <h2>Remove Face</h2>
+            <p>Enter the folder name to remove:</p>
+            <input type="text" id="remove-face-input" />
+            <button id="button-confirm-remove-face">Confirm</button>
+            <button id="button-cancel-remove-face">Cancel</button>
+            <h3>Folder Names</h3>
+            <ul id="folder-names"></ul>
+          </div>
+          <div id="name-modal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);">
+            <form id="name-form">
+              <label for="name-input">Name:</label>
+              <input type="text" id="name-input" />
+              <button type="submit">Submit</button>
+           </form>
+         </div>
+        </div>
+      <button id="back-button" style="position: absolute; top: 10px; left: 10px;">Back</button>
+      </div>
+      <div id="popup"  style="display:none; position: absolute; top: 10px; padding: 10px 20px; background-color: white; border-radius: 5px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); font-size: 18px;">Scan RFID for Admin Privileges <span id="countdown">10</span>
+</div>
+    </div>
+
+    <script>
+    //initializing variables 
+    let rfidEnabled = false; //flag for rfid to indiciate if scanning is enabled
+    let timeout; //store timeout with var
+    let countdownTimeout; //variable to store countdown timeout
+    let adminAccess = false; //flag to indiciate if user has admin access
+    let faceCounter = 0; //variable to count the num of faces scanned
+    let folderCounter = 1; //variable to store the folder counter
+    
+    
+    //function to get rfid data from server
+    async function getRFID() {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Add 1-second delay
+        const response = await fetch("/get_rfid");
+        const data = await response.json();
+        return data;
+    }
+    
+    //function to toggle rfid scanning
+    async function toggleRFID() {
+        rfidEnabled = !rfidEnabled;
+        await fetch("/toggle_rfid", {method: "POST"}); // send post req
+        if (rfidEnabled) { //if enabled, show popup
+            showPopup();
+            let timeLeft = 10;
+            countdownTimeout = setInterval(() => {
+                timeLeft -= 1;
+                document.getElementById("countdown").textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearTimeout(countdownTimeout);
+                    rfidEnabled = false;
+                    hidePopup();
+                }
+            }, 1000);
+        } else { //if disbled, clear and hide popup
+            clearTimeout(countdownTimeout);
+            hidePopup();
+        }
+    }
+    //function to get list of folders from server
+    async function getFolders() {
+  const response = await fetch("/get_folders");
+  const data = await response.json();
+  return data;
+}
+//function to fetch names of all folders and update the ui
+async function fetchFolderNames() {
+  const response = await fetch("/get_folder_names");
+  const data = await response.json();
+  const folderNames = data.folders;
+
+  const folderList = document.getElementById("folder-names");
+  folderList.innerHTML = "";
+
+  for (const folder of folderNames) {
+    const listItem = document.createElement("li");
+    listItem.textContent = folder;
+    folderList.appendChild(listItem);
+  }
+}
+
+//update folder list
+async function updateFolderNames() {
+  const folderNamesContainer = document.getElementById("folder-names-container");
+  const data = await getFolders();
+  folderNamesContainer.innerHTML = data.folders.join(", ");
+}
+
+//remove folder 
+async function removeFolder(folderName) {
+  const response = await fetch("/remove_folder", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ folder_name: folderName }),
+  });
+
+  const data = await response.json();
+
+  if (data.status === "success") {
+    alert("Folder removed successfully.");
+    fetchFolderNames();
+  } else {
+    alert("Error removing folder. Please try again.");
+  }
+}
+
+//remove facepopup
+function showRemoveFacePopup() {
+  const popup = document.getElementById("remove-face-popup");
+  popup.style.display = "block";
+}
+
+//hide remove facepoup
+function hideRemoveFacePopup() {
+  const popup = document.getElementById("remove-face-popup");
+  popup.style.display = "none";
+}
+
+//listeners
+document.getElementById("button-remove-face").addEventListener("click", showRemoveFacePopup);
+document.getElementById("button-cancel-remove-face").addEventListener("click", hideRemoveFacePopup);
+document.getElementById("button-confirm-remove-face").addEventListener("click", async function () {
+  const folderName = document.getElementById("remove-face-input").value;
+  if (!folderName) {
+    alert("Please enter a folder name.");
+    return;
+  }
+
+  const result = await removeFolder(folderName);
+  if (result.status === "success") {
+    alert("Folder removed successfully.");
+    updateFolderNames();
+  } else {
+    alert("Error removing folder. Please try again.");
+  }
+
+  hideRemoveFacePopup();
+});
+
+// Call this function when the admin panel is opened
+updateFolderNames();
+
+
+    //show rfid popup
+    function showPopup() {
+      const popup = document.getElementById("rfid-popup");
+      popup.style.display = "block";
+    }	
+
+    //hide rfid popup
+    function hidePopup() {
+      const popup = document.getElementById("rfid-popup");
+      popup.style.display = "none";
+    }
+
+    //addface popup
+    function showNameModal() {
+        const nameModal = document.getElementById("name-modal");
+        nameModal.style.display = "block";
+    }
+    //hide addface popup
+    function hideNameModal() {
+        const nameModal = document.getElementById("name-modal");
+        nameModal.style.display = "none";
+    }
+    updateFolderNames();
+    //updating
+
+    //function is called every second to check for RFID data
+    async function pollRFID() {
+      if (rfidEnabled) {
+        const rfidData = await getRFID();
+        if (rfidData.id && rfidData.text) {
+          rfidEnabled = false;
+          hidePopup();
+          adminAccess = true; // Set adminAccess to true once RFID is scanned
+          toggleTabs();
+        }
+      }
+    }
+  //event listener for button1 click which shows addface poup
+    document.getElementById("button1").addEventListener("click", showNameModal);
+    document.getElementById("button1").addEventListener("click", function () {
+  const name = document.getElementById("name-input").value;
+  if (!name) { //if no name, disply alert and return
+    alert("Please enter a name.");
+    return;
+  }
+  //capture face by making post req to /capture_face in py file.
+  fetch("/capture_face", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      //if face captured succesfully, alert and update.
+      if (data.status === "success") {
+        alert("Face captured successfully.");
+        fetchFolderNames(); // Update the folder list
+      } else {
+        alert("Error capturing face. Please try again.");
+      }
+    })
+    //catch any errors during post req and display
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error capturing face. Please try again.");
+    });
+});
+
+    //event listener for submitting the name form and also cptures a face
+    document.getElementById("name-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        const name = document.getElementById("name-input").value;
+        if (!name) {
+            alert("Please enter a name.");
+            return;
+        }
+
+        fetch("/capture_face", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    alert("Face captured successfully.");
+                } else {
+                    alert("Error capturing face. Please try again.");
+                }
+            })
+            //catch any errors during post req
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("Error capturing face. Please try again.");
+            });
+        //hide addface popup after submitting
+        hideNameModal();
+    });
+    
+    function triggerFacialUnlock() {
+      //countdown function for 3 seconds to display user how long they will have to wait.
+      var count = 3;
+      var countdownElem = document.getElementById("button5");
+      countdownElem.innerHTML = count;
+      
+      //start countdown and update the countdown element
+      var countdownInterval = setInterval(function() {
+        count--;
+        countdownElem.innerHTML = count;
+        
+        if (count == 0) {
+          clearInterval(countdownInterval);
+          countdownElem.innerHTML = "Go!";
+        }
+      }, 1000);
+       //Make an AJAX request to the /facial_unlock endpoint
+      fetch('/facial_unlock', { method: 'GET' })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === 'Facial unlocking started') {
+            console.log('Facial unlocking started');
+          } else {
+            console.log('Error starting facial unlocking');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    }
+    
+
+    function toggleTabs() {
+      //get main and admin panel elements
+        const main = document.getElementById("main");
+        const adminPanel = document.getElementById("admin-panel");
+
+        //toggle the display property of main and admin 
+        if (main.style.display === "none") {
+            main.style.display = "block";
+            adminPanel.style.display = "none";
+        } else {
+            main.style.display = "none";
+            adminPanel.style.display = "block";
+            //fetch folder nmes to update folder list
+            fetchFolderNames(); 
+        }
+    }
+
+    // Event listeners
+    document.getElementById("button3").addEventListener("click", toggleRFID);
+    document.getElementById("back-button").addEventListener("click", toggleTabs);
+
+    setInterval(pollRFID, 2000); // Poll RFID every 2 sec
+    //event listener for button4 element to start model training
+    document.getElementById("button4").addEventListener("click", function () {
+      alert("Model training has started. Please be patient as this may take a while.");
+      //ajax request to start model training
+      fetch("/train_model", {
+          method: "POST",
+      })
+          .then((response) => {
+              if (response.ok) {
+                  alert("Training completed. You may now scan a face.");
+              } else {
+                  alert("An error occurred. Try again or restart.");
+              }
+          })
+          .catch((error) => {
+              console.error("Error:", error);
+              alert("An error occurred.");
+          });
+  });
+
+</script>
+  </body>
+</html>
+
